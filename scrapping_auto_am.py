@@ -1,28 +1,28 @@
-# for web_scrapping selenium, bs4
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
 
-
+# set driver: here Chrome
 PATH = "chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 
+# link for scrapping
 driver.get("https://auto.am/search/passenger-cars?q={%22category%22:%221%22,%22page%22:%221%22,%22sort%22:%22latest%22,%22layout%22:%22list%22,%22user%22:{%22dealer%22:%220%22,%22id%22:%22%22},%22make%22:[%22386%22],%22year%22:{%22gt%22:%221911%22,%22lt%22:%222022%22},%22usdprice%22:{%22gt%22:%220%22,%22lt%22:%22100000000%22},%22mileage%22:{%22gt%22:%2210%22,%22lt%22:%221000000%22}}")
 
-
+# scrapping 
 cars = list() #List to store name of the cars
 prices = list() #List to store name of the prices
 content = driver.page_source
 soup = BeautifulSoup(content)
 for a in soup.findAll('a'):
+    # a.find() helps to find the needed information for scrapping
     car = a.find('span', attrs={'class':'card-title bold'})
     price = a.find('div', attrs={'class':'ad-mob-price bold grey-text'})
     if price is not None:
         cars.append(car.text)
         prices.append(price.text)
 
-# Preprocess car names
 cars_list = [car.split() for car in cars]
 df = pd.DataFrame(cars_list, columns=['Year', 'Mark', 'Model', 'Series', 'Ext'])
 
@@ -44,7 +44,6 @@ df['Model'] = full_model
 
 df.drop(['Series', 'Ext'], axis=1, inplace = True)
 
-# Preprocess prices
 prices = [price.replace('$','') for price in prices]
 
 prices = [re.sub('\s', '', price) for price in prices]
